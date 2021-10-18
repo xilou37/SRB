@@ -10,6 +10,7 @@
         <module>service-sms</module>
         <module>service-oss</module>
         <module>service-gateway</module>
+        <module>rabbit-mq</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -143,11 +144,11 @@
                 <artifactId>fastjson</artifactId>
                 <version>${fastjson.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.json</groupId>
-                <artifactId>json</artifactId>
-                <version>${json.version}</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>org.json</groupId>-->
+<!--                <artifactId>json</artifactId>-->
+<!--                <version>${json.version}</version>-->
+<!--            </dependency>-->
             <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>

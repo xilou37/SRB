@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lf.common.exception.Assert;
 import com.lf.common.result.ResponseEnum;
+import com.lf.srb.base.dto.SmsDTO;
 import com.lf.srb.core.enums.TransTypeEnum;
 import com.lf.srb.core.hfb.FormHelper;
 import com.lf.srb.core.hfb.HfbConst;
@@ -17,7 +18,10 @@ import com.lf.srb.core.pojo.entity.UserInfo;
 import com.lf.srb.core.service.TransFlowService;
 import com.lf.srb.core.service.UserAccountService;
 import com.lf.srb.core.service.UserBindService;
+import com.lf.srb.core.service.UserInfoService;
 import com.lf.srb.core.util.LendNoUtils;
+import com.lf.srb.rabbitutil.constant.MQConst;
+import com.lf.srb.rabbitutil.service.MQService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +51,10 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
 
     @Resource
     private UserAccountService userAccountService;
+    @Resource
+    private UserInfoService userInfoService;
+    @Resource
+    private MQService mqService;
 
     @Override
     public String commitCharge(BigDecimal chargeAmt, Long userId) {
@@ -90,6 +98,15 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
         agentBillNo = (String)paramMap.get("agentBillNo");//商户充值订单号
         TransFlowBO transFlowBO = new TransFlowBO(agentBillNo, bindCode, new BigDecimal(chargeAmt), TransTypeEnum.RECHARGE, "充值");
         transFlowService.saveTransFlow(transFlowBO);
+
+        //发消息
+        log.info("发消息");
+        String mobile = userInfoService.getMobileByBindCode(bindCode);
+        SmsDTO smsDTO = new SmsDTO();
+        smsDTO.setMobile(mobile);
+        smsDTO.setMessage("充值成功");
+        mqService.sendMessage(MQConst.EXCHANGE_TOPIC_SMS, MQConst.ROUTING_SMS_ITEM, smsDTO);
+
         return "success";
     }
 
